@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState} from 'react';
 import './ProductList.css'
 import CartItem from './CartItem';
+import { useDispatch, useSelector } from "react-redux"; 
 import { addItem } from "./CartSlice"; // <-- Step: Import reducer
+
 function ProductList({ onHomeClick }) {
     const [showCart, setShowCart] = useState(false);
     const [showPlants, setShowPlants] = useState(true); // State to control the visibility of the About Us page
     const [addedToCart, setAddedToCart] = useState({}); // Step 4
-    const [cart, setCart] = useState([]); // local cart storage
+    const dispatch = useDispatch();
+    const cart = useSelector((state) => state.cart.items);
     const plantsArray = [
         {
             category: "Air Purifying Plants",
@@ -244,7 +247,8 @@ function ProductList({ onHomeClick }) {
 
     const handleCartClick = (e) => {
         e.preventDefault();
-        setShowCart(true); // Set showCart to true when cart icon is clicked
+        setShowCart(true);
+        setShowPlants(false); // Set showCart to true when cart icon is clicked
     };
     const handlePlantsClick = (e) => {
         e.preventDefault();
@@ -254,8 +258,8 @@ function ProductList({ onHomeClick }) {
 
      const handleAddToCart = (product) => {
   dispatch(addItem(product)); // Dispatch the action to add the product to the cart (Redux action)
-  setAddedToCart((prevState) => ({ // Update the local state to reflect that the product has been added
-    ...prevState, // Spread the previous state to retain existing entries
+  setAddedToCart((prev) => ({ // Update the local state to reflect that the product has been added
+    ...prev, // Spread the previous state to retain existing entries
     [product.name]: true, // Set the current product's name as a key with value 'true' to mark it as added
   }));
 };
@@ -263,6 +267,7 @@ function ProductList({ onHomeClick }) {
     const handleContinueShopping = (e) => {
         e.preventDefault();
         setShowCart(false);
+        setShowPlants(true);
     };
     return (
         <div>
@@ -305,9 +310,12 @@ function ProductList({ onHomeClick }) {
           <div className="product-cost">${plant.cost}</div> {/* Display plant cost */}
           <button
             className="product-button"
-            onClick={() => handleAddToCart(plant)} // Handle adding plant to cart
+            onClick={() => handleAddToCart(plant)}
+            disabled={addedToCart[plant.name]} // Handle adding plant to cart
           >
-            Add to Cart
+             {addedToCart[plant.name]
+                        ? "Added to Cart"
+                        : "Add to Cart"}
           </button>
         </div>
       ))}
